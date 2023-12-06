@@ -105,12 +105,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()
-    # lines = ["eighttwothree-83", "xtwone3four-24", "zoneight234-14"]
-    # for line in lines:
-    #     a = parse_two(line)
-    #     print(line, a)
-    #     print()
-
-    a = parse("one")
-    print(a)
+    main()
