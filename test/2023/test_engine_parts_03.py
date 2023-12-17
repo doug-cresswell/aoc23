@@ -1,10 +1,12 @@
 import pytest
 
 from src.twenty_three.engine_parts_03 import (
+    Characters,
+    Match,
+    get_surrounding,
     parse,
     part_one,
-    part_two,
-    regex_find_diagonal,
+    regex_find_numbers,
 )
 
 
@@ -26,20 +28,44 @@ def example_snippet(example_input):
     return "\n".join(lines[:4])
 
 
-def test_regex_diagonal(example_snippet):
-    actual_matches = regex_find_diagonal(example_snippet)
-
-    expected_matches = [
-        ("", "", "467", ".", "...*"),
-        ("", ".", "114", ".", "....."),
-        ("..*.", ".", "35", ".", "...."),
-        (".....", ".", "633", ".", ".#..."),
+@pytest.fixture
+def example_matches():
+    return [
+        # "group line start end"
+        Match("467", 0, 0, 3),
+        Match("114", 0, 5, 8),
+        Match("35", 2, 2, 4),
+        Match("633", 2, 6, 9),
     ]
 
-    assert len(actual_matches) == len(expected_matches)
+
+@pytest.fixture
+def example_characters():
+    return [
+        # above before after below
+        Characters("", "", ".", "...*"),
+        Characters("", ".", ".", "....."),
+        Characters("..*.", ".", ".", "...."),
+        Characters(".....", ".", ".", ".#..."),
+    ]
+
+
+def test_regex_find_numbers(example_snippet, example_matches):
+    actual_matches = regex_find_numbers(example_snippet)
+
+    assert len(actual_matches) == len(example_matches)
 
     for i, actual in enumerate(actual_matches):
-        assert actual == expected_matches[i]
+        assert isinstance(actual, Match)
+        assert actual == example_matches[i]
+
+
+def test_get_surrounding(example_snippet, example_matches, example_characters):
+    assert len(example_matches) == len(example_characters)
+    for i, m in enumerate(example_matches):
+        actual = get_surrounding(m, example_snippet)
+        assert isinstance(actual, Characters)
+        assert actual == example_characters[i]
 
 
 def test_parse(example_input):
@@ -66,9 +92,9 @@ def test_part_one(example_input):
     assert actual == expected
 
 
-@pytest.mark.xfail("Need output for part two example")
-def test_part_two(example_input):
-    actual = part_two(example_input)
-    expected = None
-    raise NotImplementedError("Test not implemented, add expected for part two")
-    assert actual == expected
+# @pytest.mark.xfail("Need output for part two example")
+# def test_part_two(example_input):
+#     actual = part_two(example_input)
+#     expected = None
+#     raise NotImplementedError("Test not implemented, add expected for part two")
+#     assert actual == expected

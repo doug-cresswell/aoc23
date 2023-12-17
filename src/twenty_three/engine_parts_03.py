@@ -1,35 +1,77 @@
 import logging
 import re
+from collections import namedtuple
 from pprint import pprint
-from typing import List, Tuple
+from typing import List
 
 logger = logging.getLogger(__name__)
 
 
-def regex_find_diagonal(input_text: str) -> List[Tuple[str]]:
-    """Find potential part numbers with their surrounding characters."""
-    pattern = re.compile(r"[\d]+")
+# Create named tuple Class for matches
+# group is the regex matched string
+# line is the line number index
+# start and stop are the character index of the match group on the line
+Match = namedtuple("Match", "group line start end")
 
+# Named tuple class for characters surrounding the match
+Characters = namedtuple("Characters", "above before after below")
+
+
+def regex_find_numbers(input_text: str) -> Match:
+    """
+    Find numbers and their positions within the text.
+
+    Return: (List of tuples of ints)
+        - number matched
+        - line number
+        - start index on line
+        - stop index on line
+    """
     lines = [s.strip() for s in input_text.splitlines()]
+    pattern = re.compile(r"[\d]+")
 
     matches = []
     for i, line in enumerate(lines):
-        logger.debug(f"{i=}\t{line=}")
         for m in pattern.finditer(line):
-            logger.debug(m.group())
             start, end = m.start(), m.end()
-            left_start, right_end = max(0, start - 1), min(end + 1, len(line))
-
-            above = "" if i == 0 else lines[i - 1][left_start:right_end]
-            left = line[left_start:start]
-            right = line[end:right_end]
-            below = lines[i + 1][left_start:right_end] if i + 1 < len(lines) else ""
-
-            match = (above, left, m.group(), right, below)
+            match = Match(group=m.group(), line=i, start=start, end=end)
             matches.append(match)
-        logger.debug()
 
     return matches
+
+
+def get_surrounding(match: Match, input_text: str) -> Characters:
+    """
+    Get characters surrounding the match position.
+
+    Return:
+        - Line Above
+        - Precedent Character
+        - Antecedent Character
+        - Line Below
+    """
+
+    lines = [s.strip() for s in input_text.splitlines()]
+
+    # Get single character before and after match
+    line = lines[match.line]
+    left_start, right_end = max(0, match.start - 1), min(match.end + 1, len(line))
+    before = line[left_start : match.start]
+    after = line[match.end : right_end]
+
+    # Get characters above and below (including one character either side)
+    if match.line > 0:
+        above_line = lines[match.line - 1]
+        above = above_line[left_start:right_end]
+    else:
+        above = ""
+    if match.line + 1 < len(lines):
+        below_line = lines[match.line + 1]
+        below = below_line[left_start:right_end]
+    else:
+        below = ""
+
+    return Characters(above, before, after, below)
 
 
 def parse(text_input: str) -> List[int]:
@@ -40,18 +82,22 @@ def parse(text_input: str) -> List[int]:
     Periods (.) do not count as a symbol.
     """
 
+    # We need:
+    # match line number (to get all characters)
+    # match (to remove from list of characters)
+    # match start and end position in the line (to filter line characters)
+
     # Findall digit matches
-    matches = regex_find_diagonal(text_input)
+    matches = regex_find_numbers(text_input)
     part_numbers = []
     for match in matches:
-        # Get numbers and characters immediately to sides
-        match = list(match)
-        number = match.pop(2)
+        # Get characters surrounding matched number
+        characters = get_surrounding(match, text_input)
 
-        # Any characters surrounding match group are a symbol other than '.'
-        surrounding = "".join(match)
-        if any(s != "." for s in surrounding):
-            part_numbers.append(int(number))
+        # Search for any characters  a symbol other than '.'
+        symbol_pattern = re.compile(r"[^\d\.]")
+        if symbol_pattern.search("".join(characters)):
+            part_numbers.append(int(match.group))
 
     return part_numbers
 
