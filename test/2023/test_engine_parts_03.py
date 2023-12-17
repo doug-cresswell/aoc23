@@ -4,7 +4,7 @@ from src.twenty_three.engine_parts_03 import (
     Characters,
     Match,
     get_surrounding,
-    parse,
+    parse_part_numbers,
     part_one,
     regex_find_numbers,
 )
@@ -68,11 +68,11 @@ def test_get_surrounding(example_snippet, example_matches, example_characters):
         assert actual == example_characters[i]
 
 
-def test_parse(example_input):
+def test_parse_part_numbers(example_input):
     lines = example_input.split("\n")
     assert lines[0] == "467..114.."
 
-    actual = parse(example_input)
+    actual = parse_part_numbers(example_input)
     expected = [
         467,
         35,

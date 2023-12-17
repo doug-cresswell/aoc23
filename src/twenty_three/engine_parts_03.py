@@ -74,7 +74,7 @@ def get_surrounding(match: Match, input_text: str) -> Characters:
     return Characters(above, before, after, below)
 
 
-def parse(text_input: str) -> List[int]:
+def parse_part_numbers(text_input: str) -> List[int]:
     """
     Extract engine part numbers from input text.
 
@@ -104,13 +104,15 @@ def parse(text_input: str) -> List[int]:
 
 def part_one(text_lines: str):
     """Parse the part numbers from the input text and sum the result."""
-    numbers = parse(text_lines)
+    numbers = parse_part_numbers(text_lines)
     return sum(numbers)
 
 
 def part_two(text_lines: str):
-    # Your solution for part two
-    pass
+    """Parse all the gears and their ratios from their input_text and sum the result."""
+    # TODO: Implement gear ratio parse
+    ratios = []
+    return sum(ratios)
 
 
 def main():
