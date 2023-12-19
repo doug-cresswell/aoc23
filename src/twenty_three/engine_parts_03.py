@@ -2,7 +2,7 @@ import logging
 import re
 from collections import namedtuple
 from pprint import pprint
-from typing import List
+from typing import List, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +74,7 @@ def get_surrounding(match: Match, input_text: str) -> Characters:
     return Characters(above, before, after, below)
 
 
-def parse_part_numbers(text_input: str) -> List[int]:
+def parse_part_numbers(matches: List[Match], text_input: str) -> List[int]:
     """
     Extract engine part numbers from input text.
 
@@ -88,7 +88,9 @@ def parse_part_numbers(text_input: str) -> List[int]:
     # match start and end position in the line (to filter line characters)
 
     # Findall digit matches
-    matches = regex_find_numbers(text_input)
+
+    # TODO: Refactor so does not rely on regex fun
+
     part_numbers = []
     for match in matches:
         # Get characters surrounding matched number
@@ -104,14 +106,67 @@ def parse_part_numbers(text_input: str) -> List[int]:
 
 def part_one(text_lines: str):
     """Parse the part numbers from the input text and sum the result."""
-    numbers = parse_part_numbers(text_lines)
+    matches = regex_find_numbers(text_lines)
+    numbers = parse_part_numbers(matches, text_lines)
     return sum(numbers)
+
+
+# TODO: Refactor into one regex function
+def regex_find_gears(input_text: str) -> Match:
+    """Find gears and their positions within the text."""
+
+    lines = [s.strip() for s in input_text.splitlines()]
+    pattern = re.compile(r"\*")
+
+    matches = []
+    # TODO: More efficient to regex search whole text
+    # then compute the line number and line indexes?
+    for i, line in enumerate(lines):
+        for m in pattern.finditer(line):
+            match = Match(group=m.group(), line=i, start=m.start(), end=m.end())
+            matches.append(match)
+
+    return matches
+
+
+def parse_gear_parts(
+    gear_matches: List[Match], part_matches: List[Match], input_text: str
+) -> List[Tuple[int]]:
+    """Retreive list of gear part pairs from the input text."""
+
+    lines = [s.strip() for s in input_text.splitlines()]
+
+    gears = []
+    for gear in gear_matches:
+        # Get part numbers one the adjacent lines
+        start_line = max(0, gear.line - 1)
+        end_line = min(len(lines), gear.line + 1)
+
+        parts = []
+        for part in part_matches:
+            if part.line >= start_line and part.line <= end_line:
+                if True:
+                    parts.append(int(part.group))
+
+        # Get characters surrounding matched number
+        # start, end = match.line - 1, match.line + 1
+        # above, line, below = lines[start:end]
+
+        # characters = get_surrounding(match, input_text)
+
+        # Search for any characters  a symbol other than '.'
+        # symbol_pattern = re.compile(r"\d+")
+        # if symbol_pattern.search("".join(characters)):
+        #     gears.append(int(match.group))
+
+    return gears
 
 
 def part_two(text_lines: str):
     """Parse all the gears and their ratios from their input_text and sum the result."""
-    # TODO: Implement gear ratio parse
-    ratios = []
+    gears = regex_find_gears(text_lines)
+    # `Gear ratio is the result of multiplying [the] two numbers together.`
+    ratios = [x * y for x, y in gears]
     return sum(ratios)
 
 
