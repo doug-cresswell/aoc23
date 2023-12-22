@@ -113,7 +113,12 @@ def part_one(text_lines: str):
 
 # TODO: Refactor into one regex function
 def regex_find_gears(input_text: str) -> Match:
-    """Find gears and their positions within the text."""
+    """
+    Find gear symbols and their positions within the text.
+
+    Note: A gear symbol is only a gear if it is adjacent to exactly two part numbers.
+    This is determined in another function.
+    """
 
     lines = [s.strip() for s in input_text.splitlines()]
     pattern = re.compile(r"\*")
@@ -136,7 +141,7 @@ def parse_gear_parts(
 
     lines = [s.strip() for s in input_text.splitlines()]
 
-    gears = []
+    gear_parts = []
     for gear in gear_matches:
         # Get part numbers one the adjacent lines
         start_line = max(0, gear.line - 1)
@@ -145,28 +150,30 @@ def parse_gear_parts(
         parts = []
         for part in part_matches:
             if part.line >= start_line and part.line <= end_line:
-                if True:
+                gear_left, gear_right = gear.start - 1, gear.end
+                # If gear diagonal boundaries are between part start/end
+                # TODO: Check indexes / off by one error
+                if (
+                    (gear_left >= part.start and gear_left <= part.end - 1)
+                    or gear_right >= part.start
+                    and gear_right <= part.end - 1
+                ):
                     parts.append(int(part.group))
 
-        # Get characters surrounding matched number
-        # start, end = match.line - 1, match.line + 1
-        # above, line, below = lines[start:end]
-
-        # characters = get_surrounding(match, input_text)
-
-        # Search for any characters  a symbol other than '.'
-        # symbol_pattern = re.compile(r"\d+")
-        # if symbol_pattern.search("".join(characters)):
-        #     gears.append(int(match.group))
-
-    return gears
+        gear_parts.append(tuple(parts))
+    return [g for g in gear_parts if len(g) == 2]
 
 
 def part_two(text_lines: str):
     """Parse all the gears and their ratios from their input_text and sum the result."""
-    gears = regex_find_gears(text_lines)
+    potential_gears = regex_find_gears(text_lines)
+    part_nos = regex_find_numbers(text_lines)
+    gear_parts = parse_gear_parts(
+        gear_matches=potential_gears, part_matches=part_nos, input_text=text_lines
+    )
+
     # `Gear ratio is the result of multiplying [the] two numbers together.`
-    ratios = [x * y for x, y in gears]
+    ratios = [x * y for x, y in gear_parts]
     return sum(ratios)
 
 
