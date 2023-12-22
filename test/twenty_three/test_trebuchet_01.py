@@ -1,3 +1,4 @@
+import logging
 from textwrap import dedent
 
 import pytest
@@ -46,7 +47,8 @@ def answer_two():
     ],
 )
 def test_parse(txt, expected):
-    print(txt, expected)
+    logging.debug(f"{txt=}")
+    logging.debug(f"{expected=}")
     actual = parse(txt)
     assert actual == expected
 
@@ -68,7 +70,8 @@ def test_parse(txt, expected):
     ],
 )
 def test_parse_two(txt, expected):
-    print(txt, expected)
+    logging.debug(f"{txt=}")
+    logging.debug(f"{expected=}")
     actual = parse_two(txt)
     assert actual == expected
 

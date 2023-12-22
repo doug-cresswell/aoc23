@@ -25,7 +25,7 @@ def example_input():
 
 
 @pytest.fixture
-def example_short(example_input):
+def example_input_short(example_input):
     """Shorter input for writing less test results."""
     lines = example_input.strip().split("\n")
     return "\n".join(lines[:4])
@@ -84,10 +84,10 @@ def test_regex_find_numbers(example_input, parts_matches):
         assert actual == parts_matches[i]
 
 
-def test_get_surrounding(example_short, parts_matches_short, characters_short):
+def test_get_surrounding(example_input_short, parts_matches_short, characters_short):
     assert len(parts_matches_short) == len(characters_short)
     for i, m in enumerate(parts_matches_short):
-        actual = get_surrounding(m, example_short)
+        actual = get_surrounding(m, example_input_short)
         assert isinstance(actual, Characters)
         assert actual == characters_short[i]
 
@@ -115,17 +115,10 @@ def test_regex_find_gears(example_input, gears_matches):
     assert actual == gears_matches
 
 
-def test_parse_gear_parts(gears_matches, example_input):
+def test_parse_gear_parts(gears_matches, parts_matches, example_input):
     expected_parts = [(467, 35), (755, 598)]
-    part_matches = [
-        # "group line start end"
-        Match("467", 0, 0, 3),
-        Match("114", 0, 5, 8),
-        Match("35", 2, 2, 4),
-        Match("633", 2, 6, 9),
-    ]
     actual_parts = parse_gear_parts(
-        gear_matches=gears_matches, part_matches=part_matches, input_text=example_input
+        gear_matches=gears_matches, part_matches=parts_matches, input_text=example_input
     )
     for i, actual in enumerate(actual_parts):
         assert actual == expected_parts[i]
@@ -137,7 +130,6 @@ def test_part_one(example_input):
     assert actual == expected
 
 
-@pytest.mark.xfail(reason="dependent function not implemented")
 def test_part_two(example_input):
     actual = part_two(example_input)
     expected = 467835
