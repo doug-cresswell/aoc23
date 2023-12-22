@@ -1,7 +1,7 @@
-import logging
 from pprint import pprint
+from ..logger_config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def parse(text: str):

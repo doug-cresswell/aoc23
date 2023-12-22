@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import ast
-import logging
 from collections import Counter
 from functools import reduce
 from pprint import pprint
 from typing import List
+from ..logger_config import get_logger
 
-logger = logging.getLogger(__name__)
+
+logger = get_logger(__name__)
 
 
 class CubeSet(Counter):
