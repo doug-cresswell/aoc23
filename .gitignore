@@ -160,3 +160,7 @@ cython_debug/
 #.idea/
 .vscode/settings.json
 *.txt
+
+
+# Mac files
+.DS_Store
